@@ -1,15 +1,14 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, Renderer2, ViewChild, ViewEncapsulation } from '@angular/core';
 import { SystemTable, SystemTableNameField } from '../models/SystemTable';
 import { Observable } from 'rxjs';
 import { Table } from 'primeng/table';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { AutoComplete } from 'primeng/autocomplete';
 
 @Component({
   selector: 'app-system-table',
   templateUrl: './system-table.component.html',
-  styleUrls: ['./system-table.component.scss', '../../styles.scss'], // Update your styling to SCSS if needed
-  encapsulation: ViewEncapsulation.None, // For ::ng-deep
+  styleUrls: ['./system-table.component.scss', '../../styles.scss'],
 })
 export class SystemTableComponent implements OnInit {
   title: string = 'הצגת טבלאות קהילתיות';
@@ -32,8 +31,9 @@ export class SystemTableComponent implements OnInit {
   tablesList: SystemTable[] = [];
   flagPaginator: boolean = false;
   tableWithHebrewFieldName: SystemTableNameField[] = [];
+  isSuggestionsVisible: boolean = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private renderer: Renderer2, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     const url = `/shaarolami/CustomspilotWeb/SystemTables/api/GetTableData?tableName=${this.param}`;
@@ -90,9 +90,12 @@ export class SystemTableComponent implements OnInit {
     return this.http.get<any>(url);
   }
 
+  @ViewChild('autoComplete') autoComplete!: AutoComplete;
+
   initSystemTablesList(list: SystemTable[]) {
     this.filterTables = list.filter((elem, index, self) => index === self.findIndex(i => i.ExtraStringData == elem.ExtraStringData));
-
+    this.isSuggestionsVisible = this.filterTables.length > 0;
+    this.renderer.removeAttribute(this.autoComplete, 'aria-expanded');
   }
 
   filterTablesType(): void {
@@ -120,6 +123,9 @@ export class SystemTableComponent implements OnInit {
       error: (error) => console.error('Error fetching search data:', error),
     });
     this.resetPaging();
+    setTimeout(() => {
+      this.setPaginationAriaLabels();
+    }, 1000);
   }
 
   @ViewChild('dt') table!: Table;
@@ -127,5 +133,59 @@ export class SystemTableComponent implements OnInit {
   resetPaging(): void {
     this.currentIndex = 0;
     this.table.reset();
+  }
+  @ViewChild('myTable') myTable!: Table;
+
+  setPaginationAriaLabels() {
+    const paginator = this.table.el.nativeElement.querySelector('.p-paginator') as HTMLElement;
+    if (paginator) {
+      paginator.setAttribute('role', 'list');
+      const nav = document.createElement('nav');
+      nav.setAttribute('aria-label', 'דפדוף');
+      paginator.parentNode?.insertBefore(nav, paginator);
+      nav.appendChild(paginator);
+      const firstButton = paginator.querySelector('.p-paginator-first');
+      const prevButton = paginator.querySelector('.p-paginator-prev');
+      const nextButton = paginator.querySelector('.p-paginator-next');
+      const lastButton = paginator.querySelector('.p-paginator-last');
+
+      if (firstButton) firstButton.setAttribute('aria-label', 'עמוד ראשון');
+      if (prevButton) prevButton.setAttribute('aria-label', 'עמוד קודם');
+      if (nextButton) nextButton.setAttribute('aria-label', 'עמוד הבא');
+      if (lastButton) lastButton.setAttribute('aria-label', 'עמוד אחרון');
+
+      // setTimeout(() => {
+      //   const ul = document.createElement('ul');
+      //   ul.setAttribute('aria-label', 'רשימת כפתורים');
+      //   ul.style.listStyleType = 'none';
+      //   ul.style.padding = '0';
+      //   // this.cdr.detectChanges();
+
+      //   const buttons = paginator.querySelectorAll('button');
+      //   paginator.innerHTML = '';
+      //   paginator.appendChild(ul);
+
+      //   buttons.forEach((button) => {
+      //     const li = document.createElement('li');
+      //     li.style.display = 'inline';
+      //     li.style.marginRight = '8px';
+
+      //     li.appendChild(button.cloneNode(true));
+      //     ul.appendChild(li);
+      //   });
+      // }, 0);
+    }
+  }
+
+  ngAfterViewInit() {
+    const button = this.autoComplete.el.nativeElement.querySelector('button');
+    if (button) {
+      button.setAttribute('aria-label', 'לחץ כדי לפתוח רשימת טבלאות');
+      button.setAttribute('tabindex', '0');
+    }
+  }
+
+  toggleDropdownVisibility() {
+    this.isSuggestionsVisible = !this.isSuggestionsVisible;
   }
 }

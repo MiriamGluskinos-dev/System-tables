@@ -1,12 +1,10 @@
 export class SystemTable {
-
-
     public ID: string;
     public MalamId: string;
     public Name: string;
     public State: string;
+    
     public ExtraStringData: string;
-
     constructor
         (
             ID: string,
@@ -24,21 +22,11 @@ export class SystemTable {
 
    
   get displayText(): string {
-
-        // if (this.currencyTypeID == undefined)
-        //     return this.currencyTypeName;
-
         return ` ${this.ID} - ${this.ExtraStringData} `;
     }
 }
 
-
-
-
-
 export class SystemTableNameField {
-
-
     public field: string;
     public header: string;
     constructor
@@ -46,8 +34,5 @@ export class SystemTableNameField {
             header: string, ) {
         this.field = field;
         this.header = header;
-
     }
-
-  
 }  
