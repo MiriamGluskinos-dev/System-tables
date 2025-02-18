@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Table } from 'primeng/table';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { AutoComplete } from 'primeng/autocomplete';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-system-table',
@@ -32,11 +33,12 @@ export class SystemTableComponent implements OnInit {
   flagPaginator: boolean = false;
   tableWithHebrewFieldName: SystemTableNameField[] = [];
   isSuggestionsVisible: boolean = false;
+  private shaarolamiBaseUrl = environment.baseUrls.shaarolami;
 
   constructor(private http: HttpClient, private renderer: Renderer2, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    const url = `/shaarolami/CustomspilotWeb/SystemTables/api/GetTableData?tableName=${this.param}`;
+    const url = `${this.shaarolamiBaseUrl}/CustomspilotWeb/SystemTables/api/GetTableData?tableName=${this.param}`;
     this.callService(url).subscribe({
       next: (response) => this.onSuccessTables(response),
       error: (error) => console.error('Error fetching table data:', error),
@@ -116,7 +118,7 @@ export class SystemTableComponent implements OnInit {
   searchData(): void {
     this.flagPaginator = true;
     this.columns = this.selectedtablesTypeList?.columns || [];
-    const url = `/shaarolami/CustomspilotWeb/SystemTables/api/GetTableData?tableName=${this.selectedtablesTypeList.Name}&includeMetadata=true`;
+    const url = `${this.shaarolamiBaseUrl}/CustomspilotWeb/SystemTables/api/GetTableData?tableName=${this.selectedtablesTypeList.Name}&includeMetadata=true`;
     this.callService(url).subscribe({
       next: (response) =>
         this.onSuccess(response, this.selectedtablesTypeList.ID),

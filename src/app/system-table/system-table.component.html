@@ -26,7 +26,7 @@
   <div class="col-sm-12 table-responsive table-striped lg-mb-30 xs-mb-25">
 
     <p-table #myTable [columns]="columns" [value]="gridData"
-    [paginator]="true" [rows]="50" tabindex="0" [responsive]="true" appendTo="body"
+    [paginator]="flagPaginator" [rows]="50" tabindex="0" [responsive]="true" appendTo="body"
       [first]="currentIndex" (onFilter)="dt.reset()" #dt class="mainTable" tabindex="0">
 
       <ng-template pTemplate="header" let-columns>
