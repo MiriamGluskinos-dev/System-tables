@@ -76,6 +76,8 @@ export class SystemTableComponent implements OnInit {
             (tableID === 2050 && r.Name === 'ID') ||
             (tableID === 239688 && r.Name === 'ExternalIdNum')
           )
+          //Adding a condition to display the ID only once
+          && (r.Name !== 'MalamID')
         ) {
           acc.push(new SystemTableNameField(r.Name, r.Description));
         }
